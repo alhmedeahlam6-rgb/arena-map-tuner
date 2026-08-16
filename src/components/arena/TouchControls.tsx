@@ -308,7 +308,7 @@ export default function TouchControls({
           <div className="absolute inset-0 rounded-full" />
           {/* base ring */}
           <div
-            className="absolute left-1/2 top-1/2 h-[150px] w-[150px] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/20 bg-black/30 shadow-[0_0_28px_-8px_rgba(0,0,0,0.9)] backdrop-blur-sm transition-all duration-75"
+            className="absolute left-1/2 top-1/2 h-[150px] w-[150px] rounded-full border-2 border-white/20 bg-black/30 shadow-[0_0_28px_-8px_rgba(0,0,0,0.9)] backdrop-blur-sm transition-all duration-75"
             style={{
               transform: `translate(calc(-50% + ${baseOffset.x}px), calc(-50% + ${baseOffset.y}px))`,
               opacity: active ? 1 : 0.55,
