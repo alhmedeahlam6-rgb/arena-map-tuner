@@ -172,6 +172,15 @@ export default function TouchControls({
     setSprinting(false);
   };
 
+  const resetStick = () => {
+    padId.current = null;
+    baseRef.current = { x: 0, y: 0 };
+    setKnob({ x: 0, y: 0 });
+    setBaseOffset({ x: 0, y: 0 });
+    setActive(false);
+    clearMove();
+  };
+
   const applyStick = (dx: number, dy: number) => {
     const dist = Math.hypot(dx, dy);
     const max = stickRadius;
