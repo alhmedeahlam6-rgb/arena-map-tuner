@@ -2075,6 +2075,10 @@ export default function LoneWolfArena() {
       renderer.domElement.removeEventListener("pointerdown", onTouchLookStart);
       window.removeEventListener("pointerup", onTouchLookEnd);
       window.removeEventListener("pointercancel", onTouchLookEnd);
+      renderer.domElement.removeEventListener("lostpointercapture", onLostLookCapture);
+      window.removeEventListener("touchend", onAnyTouchEnd);
+      window.removeEventListener("touchcancel", onAnyTouchEnd);
+
       renderer.domElement.removeEventListener("pointerdown", onPointerDown);
       renderer.domElement.removeEventListener("mousedown", onMouseDown);
       renderer.domElement.removeEventListener("contextmenu", onContextMenu);
