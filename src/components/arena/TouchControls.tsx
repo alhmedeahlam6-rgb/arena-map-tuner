@@ -224,20 +224,22 @@ export default function TouchControls({
           } catch {
             /* capture is best-effort */
           }
-          const { dx, dy } = stickFromEvent(e);
-          // Float the base toward the thumb, but keep it within a reasonable radius so
-          // the knob never leaves the touch pad.
+          const { dx, dy } = stickFromEvent(e, { x: 0, y: 0 });
+          // Float the base under the thumb (clamped inside the pad) and start
+          // perfectly centred — no movement until the finger actually drags.
           const floatClamp = stickRadius * 0.55;
           const dist = Math.hypot(dx, dy);
           const ratio = dist > floatClamp ? floatClamp / dist : 1;
-          setBaseOffset({ x: dx * ratio, y: dy * ratio });
+          const base = { x: dx * ratio, y: dy * ratio };
+          baseRef.current = base;
+          setBaseOffset(base);
           setActive(true);
-          applyStick(dx - dx * ratio, dy - dy * ratio);
+          applyStick(dx - base.x, dy - base.y);
         },
         onPointerMove: (e: React.PointerEvent) => {
           if (padId.current !== e.pointerId || !padRef.current) return;
           e.preventDefault();
-          const { dx, dy } = stickFromEvent(e);
+          const { dx, dy } = stickFromEvent(e, baseRef.current);
           applyStick(dx, dy);
         },
         onPointerUp: (e: React.PointerEvent) => {
