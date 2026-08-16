@@ -158,7 +158,10 @@ export default function TouchControls({
   const [knob, setKnob] = useState({ x: 0, y: 0 });
   const [baseOffset, setBaseOffset] = useState({ x: 0, y: 0 });
   const stickRadius = 72; // px, visual + logical max
-  const deadZone = 0.15;
+  const deadZone = 0.06;
+  // the pad lives inside a CSS-scaled wrapper, so screen pixels must be
+  // converted to local pixels or the knob drifts away from the thumb
+  const stickScale = scale * (settings.controls.stick?.scale ?? 1) || 1;
 
   const cw = { settings, scale, editing, onMoveControl };
 
