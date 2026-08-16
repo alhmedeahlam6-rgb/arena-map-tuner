@@ -1263,7 +1263,9 @@ export default function LoneWolfArena() {
         const sens = cfg.touchSensitivity * (adsRef.current ? cfg.adsMultiplier : 1);
         const inv = cfg.invertY ? -1 : 1;
         yaw -= (e.clientX - touchLastX) * sens;
-        pitch = Math.max(-1.2, Math.min(1.2, pitch - (e.clientY - touchLastY) * sens * inv));
+        // camera forward is the negated dir vector, so dragging down (+clientY)
+        // must increase pitch for the view to actually tilt down
+        pitch = Math.max(-1.2, Math.min(1.2, pitch + (e.clientY - touchLastY) * sens * inv));
         touchLastX = e.clientX;
         touchLastY = e.clientY;
         return;
@@ -1274,7 +1276,7 @@ export default function LoneWolfArena() {
         const sens = cfg.mouseSensitivity * (adsRef.current ? cfg.adsMultiplier : 1);
         const inv = cfg.invertY ? -1 : 1;
         yaw -= e.movementX * sens;
-        pitch = Math.max(-1.2, Math.min(1.2, pitch - e.movementY * sens * inv));
+        pitch = Math.max(-1.2, Math.min(1.2, pitch + e.movementY * sens * inv));
         return;
       }
       if (!dragging) return;

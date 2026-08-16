@@ -39,7 +39,7 @@ type Props = {
 
 /** shared round glass button, matching the reference HUD's dark translucent discs */
 const disc =
-  "pointer-events-auto flex items-center justify-center rounded-full border border-white/25 bg-black/45 backdrop-blur-sm transition active:scale-95 active:bg-white/25 select-none";
+  "pointer-events-auto touch-none flex items-center justify-center rounded-full border border-white/25 bg-black/45 backdrop-blur-sm transition active:scale-95 active:bg-white/25 select-none";
 
 const glyph = "object-contain [filter:invert(1)] opacity-90";
 
@@ -157,8 +157,12 @@ export default function TouchControls({
   const [active, setActive] = useState(false);
   const [knob, setKnob] = useState({ x: 0, y: 0 });
   const [baseOffset, setBaseOffset] = useState({ x: 0, y: 0 });
+  const baseRef = useRef({ x: 0, y: 0 });
   const stickRadius = 72; // px, visual + logical max
-  const deadZone = 0.15;
+  const deadZone = 0.06;
+  // the pad lives inside a CSS-scaled wrapper, so screen pixels must be
+  // converted to local pixels or the knob drifts away from the thumb
+  const stickScale = scale * (settings.controls.stick?.scale ?? 1) || 1;
 
   const cw = { settings, scale, editing, onMoveControl };
 
@@ -166,6 +170,15 @@ export default function TouchControls({
     MOVE_KEYS.forEach((k) => release(k));
     release("ShiftLeft");
     setSprinting(false);
+  };
+
+  const resetStick = () => {
+    padId.current = null;
+    baseRef.current = { x: 0, y: 0 };
+    setKnob({ x: 0, y: 0 });
+    setBaseOffset({ x: 0, y: 0 });
+    setActive(false);
+    clearMove();
   };
 
   const applyStick = (dx: number, dy: number) => {
@@ -197,13 +210,14 @@ export default function TouchControls({
     else release("ShiftLeft");
   };
 
-  const stickFromEvent = (e: React.PointerEvent) => {
+  /** finger offset from the floating base, in local (unscaled) pixels */
+  const stickFromEvent = (e: React.PointerEvent, base = baseOffset) => {
     const el = padRef.current;
     if (!el) return { dx: 0, dy: 0 };
     const r = el.getBoundingClientRect();
     return {
-      dx: e.clientX - (r.left + r.width / 2 + baseOffset.x),
-      dy: e.clientY - (r.top + r.height / 2 + baseOffset.y),
+      dx: (e.clientX - (r.left + r.width / 2)) / stickScale - base.x,
+      dy: (e.clientY - (r.top + r.height / 2)) / stickScale - base.y,
     };
   };
 
@@ -220,44 +234,35 @@ export default function TouchControls({
           } catch {
             /* capture is best-effort */
           }
-          const { dx, dy } = stickFromEvent(e);
-          // Float the base toward the thumb, but keep it within a reasonable radius so
-          // the knob never leaves the touch pad.
+          const { dx, dy } = stickFromEvent(e, { x: 0, y: 0 });
+          // Float the base under the thumb (clamped inside the pad) and start
+          // perfectly centred — no movement until the finger actually drags.
           const floatClamp = stickRadius * 0.55;
           const dist = Math.hypot(dx, dy);
           const ratio = dist > floatClamp ? floatClamp / dist : 1;
-          setBaseOffset({ x: dx * ratio, y: dy * ratio });
+          const base = { x: dx * ratio, y: dy * ratio };
+          baseRef.current = base;
+          setBaseOffset(base);
           setActive(true);
-          applyStick(dx - dx * ratio, dy - dy * ratio);
+          applyStick(dx - base.x, dy - base.y);
         },
         onPointerMove: (e: React.PointerEvent) => {
           if (padId.current !== e.pointerId || !padRef.current) return;
           e.preventDefault();
-          const { dx, dy } = stickFromEvent(e);
+          const { dx, dy } = stickFromEvent(e, baseRef.current);
           applyStick(dx, dy);
         },
         onPointerUp: (e: React.PointerEvent) => {
           if (padId.current !== e.pointerId) return;
-          padId.current = null;
-          setKnob({ x: 0, y: 0 });
-          setBaseOffset({ x: 0, y: 0 });
-          setActive(false);
-          clearMove();
+          resetStick();
         },
         onPointerCancel: (e: React.PointerEvent) => {
           if (padId.current !== e.pointerId) return;
-          padId.current = null;
-          setKnob({ x: 0, y: 0 });
-          setBaseOffset({ x: 0, y: 0 });
-          setActive(false);
-          clearMove();
+          resetStick();
         },
-        onLostPointerCapture: () => {
-          padId.current = null;
-          setKnob({ x: 0, y: 0 });
-          setBaseOffset({ x: 0, y: 0 });
-          setActive(false);
-          clearMove();
+        onLostPointerCapture: (e: React.PointerEvent) => {
+          if (padId.current !== e.pointerId) return;
+          resetStick();
         },
         onContextMenu: (e: React.MouseEvent) => e.preventDefault(),
       };
