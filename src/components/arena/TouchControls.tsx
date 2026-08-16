@@ -157,6 +157,7 @@ export default function TouchControls({
   const [active, setActive] = useState(false);
   const [knob, setKnob] = useState({ x: 0, y: 0 });
   const [baseOffset, setBaseOffset] = useState({ x: 0, y: 0 });
+  const baseRef = useRef({ x: 0, y: 0 });
   const stickRadius = 72; // px, visual + logical max
   const deadZone = 0.06;
   // the pad lives inside a CSS-scaled wrapper, so screen pixels must be
