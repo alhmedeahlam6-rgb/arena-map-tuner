@@ -200,13 +200,14 @@ export default function TouchControls({
     else release("ShiftLeft");
   };
 
-  const stickFromEvent = (e: React.PointerEvent) => {
+  /** finger offset from the floating base, in local (unscaled) pixels */
+  const stickFromEvent = (e: React.PointerEvent, base = baseOffset) => {
     const el = padRef.current;
     if (!el) return { dx: 0, dy: 0 };
     const r = el.getBoundingClientRect();
     return {
-      dx: e.clientX - (r.left + r.width / 2 + baseOffset.x),
-      dy: e.clientY - (r.top + r.height / 2 + baseOffset.y),
+      dx: (e.clientX - (r.left + r.width / 2)) / stickScale - base.x,
+      dy: (e.clientY - (r.top + r.height / 2)) / stickScale - base.y,
     };
   };
 
