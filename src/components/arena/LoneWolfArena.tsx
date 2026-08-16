@@ -1256,6 +1256,16 @@ export default function LoneWolfArena() {
     const onTouchLookEnd = (e: PointerEvent) => {
       if (touchLookId === e.pointerId) touchLookId = null;
     };
+    // Safety net: if a touch is swallowed (capture lost during a frame hitch,
+    // gesture cancel, overlay churn) the look pointer could stay latched and
+    // aiming would die until reload. Clear it whenever no fingers remain.
+    const onLostLookCapture = (e: PointerEvent) => {
+      if (touchLookId === e.pointerId) touchLookId = null;
+    };
+    const onAnyTouchEnd = (e: TouchEvent) => {
+      if (e.touches.length === 0) touchLookId = null;
+    };
+
 
     const onPointerMove = (e: PointerEvent) => {
       if (touchLookId === e.pointerId) {
