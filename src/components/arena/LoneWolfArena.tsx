@@ -1256,6 +1256,16 @@ export default function LoneWolfArena() {
     const onTouchLookEnd = (e: PointerEvent) => {
       if (touchLookId === e.pointerId) touchLookId = null;
     };
+    // Safety net: if a touch is swallowed (capture lost during a frame hitch,
+    // gesture cancel, overlay churn) the look pointer could stay latched and
+    // aiming would die until reload. Clear it whenever no fingers remain.
+    const onLostLookCapture = (e: PointerEvent) => {
+      if (touchLookId === e.pointerId) touchLookId = null;
+    };
+    const onAnyTouchEnd = (e: TouchEvent) => {
+      if (e.touches.length === 0) touchLookId = null;
+    };
+
 
     const onPointerMove = (e: PointerEvent) => {
       if (touchLookId === e.pointerId) {
@@ -1299,6 +1309,10 @@ export default function LoneWolfArena() {
     renderer.domElement.addEventListener("pointerdown", onTouchLookStart);
     window.addEventListener("pointerup", onTouchLookEnd);
     window.addEventListener("pointercancel", onTouchLookEnd);
+    renderer.domElement.addEventListener("lostpointercapture", onLostLookCapture);
+    window.addEventListener("touchend", onAnyTouchEnd, { passive: true });
+    window.addEventListener("touchcancel", onAnyTouchEnd, { passive: true });
+
     renderer.domElement.addEventListener("pointerdown", onPointerDown);
     renderer.domElement.addEventListener("mousedown", onMouseDown);
     renderer.domElement.addEventListener("contextmenu", onContextMenu);
@@ -2061,6 +2075,10 @@ export default function LoneWolfArena() {
       renderer.domElement.removeEventListener("pointerdown", onTouchLookStart);
       window.removeEventListener("pointerup", onTouchLookEnd);
       window.removeEventListener("pointercancel", onTouchLookEnd);
+      renderer.domElement.removeEventListener("lostpointercapture", onLostLookCapture);
+      window.removeEventListener("touchend", onAnyTouchEnd);
+      window.removeEventListener("touchcancel", onAnyTouchEnd);
+
       renderer.domElement.removeEventListener("pointerdown", onPointerDown);
       renderer.domElement.removeEventListener("mousedown", onMouseDown);
       renderer.domElement.removeEventListener("contextmenu", onContextMenu);
