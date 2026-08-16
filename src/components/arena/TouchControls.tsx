@@ -245,26 +245,15 @@ export default function TouchControls({
         },
         onPointerUp: (e: React.PointerEvent) => {
           if (padId.current !== e.pointerId) return;
-          padId.current = null;
-          setKnob({ x: 0, y: 0 });
-          setBaseOffset({ x: 0, y: 0 });
-          setActive(false);
-          clearMove();
+          resetStick();
         },
         onPointerCancel: (e: React.PointerEvent) => {
           if (padId.current !== e.pointerId) return;
-          padId.current = null;
-          setKnob({ x: 0, y: 0 });
-          setBaseOffset({ x: 0, y: 0 });
-          setActive(false);
-          clearMove();
+          resetStick();
         },
-        onLostPointerCapture: () => {
-          padId.current = null;
-          setKnob({ x: 0, y: 0 });
-          setBaseOffset({ x: 0, y: 0 });
-          setActive(false);
-          clearMove();
+        onLostPointerCapture: (e: React.PointerEvent) => {
+          if (padId.current !== e.pointerId) return;
+          resetStick();
         },
         onContextMenu: (e: React.MouseEvent) => e.preventDefault(),
       };
