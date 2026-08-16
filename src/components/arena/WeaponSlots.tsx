@@ -28,10 +28,17 @@ export default function WeaponSlots({ slots, activeSlot, onSelect, ammo }: Props
       <button
         key={index}
         type="button"
-        onClick={() => onSelect(index)}
+        // pointerdown (not click) so the slot still swaps while another finger
+        // is holding the movement stick
+        onPointerDown={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onSelect(index);
+        }}
+        onContextMenu={(e) => e.preventDefault()}
         disabled={!w && !isMelee}
         aria-label={w ? `Select ${w.name}` : isMelee ? "Select melee" : "Empty weapon slot"}
-        className={`pointer-events-auto relative h-[68px] w-[104px] overflow-hidden transition-transform duration-100 active:scale-[0.97] sm:h-[76px] sm:w-[120px] ${
+        className={`pointer-events-auto relative h-[68px] w-[104px] touch-none overflow-hidden transition-transform duration-100 active:scale-[0.97] sm:h-[76px] sm:w-[120px] ${
           active ? "z-10" : "z-0"
         } ${!w && !isMelee ? "opacity-40" : ""}`}
       >
