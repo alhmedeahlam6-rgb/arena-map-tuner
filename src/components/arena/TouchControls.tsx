@@ -180,6 +180,32 @@ export default function TouchControls({
     setActive(false);
     clearMove();
   };
+  const resetRef = useRef(resetStick);
+  resetRef.current = resetStick;
+
+  // Safety net: a dropped pointerup (frame hitch, gesture cancel, lost capture)
+  // used to latch the stick "full forward" forever. Whenever no fingers are
+  // left on screen, force the stick back to neutral.
+  useEffect(() => {
+    const onEnd = (e: TouchEvent) => {
+      if (e.touches.length === 0 && padId.current !== null) resetRef.current();
+    };
+    const onUp = (e: PointerEvent) => {
+      if (padId.current === e.pointerId) resetRef.current();
+    };
+    window.addEventListener("touchend", onEnd, { passive: true });
+    window.addEventListener("touchcancel", onEnd, { passive: true });
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
+    window.addEventListener("blur", () => resetRef.current());
+    return () => {
+      window.removeEventListener("touchend", onEnd);
+      window.removeEventListener("touchcancel", onEnd);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+    };
+  }, []);
+
 
   const applyStick = (dx: number, dy: number) => {
     const dist = Math.hypot(dx, dy);
