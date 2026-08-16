@@ -39,7 +39,7 @@ type Props = {
 
 /** shared round glass button, matching the reference HUD's dark translucent discs */
 const disc =
-  "pointer-events-auto flex items-center justify-center rounded-full border border-white/25 bg-black/45 backdrop-blur-sm transition active:scale-95 active:bg-white/25 select-none";
+  "pointer-events-auto touch-none flex items-center justify-center rounded-full border border-white/25 bg-black/45 backdrop-blur-sm transition active:scale-95 active:bg-white/25 select-none";
 
 const glyph = "object-contain [filter:invert(1)] opacity-90";
 
